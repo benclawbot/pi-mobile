@@ -2,15 +2,121 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#1a1a2e" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>Pi</title>
+    <meta name="description" content="Howcode is an opinionated desktop coding app for working with Pi agents, git operations, terminal sessions, and fast YOLO coding flows." />
+    <title>Pi — code with agents, no pretend IDE</title>
+    <link rel="icon" href="/favicon.svg" />
+    <script type="module" crossorigin src="/assets/index-COW9obSh.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-mCl6wPTb.css">
+    <style>
+      /* Tailscale status indicator */
+      #tailscale-indicator {
+        position: fixed;
+        top: 8px;
+        right: 8px;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+        pointer-events: none;
+      }
+      #tailscale-indicator.connected {
+        background: rgba(80, 197, 116, 0.2);
+        border: 1px solid rgba(80, 197, 116, 0.4);
+        color: #50c574;
+      }
+      #tailscale-indicator.disconnected {
+        background: rgba(255, 107, 107, 0.2);
+        border: 1px solid rgba(255, 107, 107, 0.4);
+        color: #ff6b6b;
+      }
+      #tailscale-indicator svg {
+        width: 14px;
+        height: 14px;
+      }
+      
+      /* Mobile CSS overrides */
+      @media (max-width: 768px) {
+        /* Hide project sync warning */
+        [data-testid="project-sync"], 
+        .project-sync-warning, 
+        .sync-warning,
+        [data-desktop-bridge-required],
+        .desktop-bridge-required {
+          display: none !important;
+        }
+        
+        /* Full width chat at bottom */
+        [data-composer], .composer-dock, .composer {
+          position: fixed !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          width: 100% !important;
+          border-radius: 0 !important;
+          border-top: 1px solid var(--border, rgba(255,255,255,0.1)) !important;
+        }
+        
+        /* Scrollable thread area */
+        [data-thread-timeline], .thread-timeline {
+          flex: 1 !important;
+          overflow-y: auto !important;
+          -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Workspace full height */
+        [data-app-shell], [data-workspace-view] {
+          height: 100vh !important;
+          height: 100dvh !important;
+        }
+      }
+      
+      /* Loading spinner */
+      .bootstrap-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: #1a1a2e;
+      }
+      .bootstrap-loading::after {
+        content: '';
+        width: 48px;
+        height: 48px;
+        border: 3px solid rgba(255,255,255,0.1);
+        border-top-color: #6c5ce7;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="root">
+      <div class="bootstrap-loading"></div>
+    </div>
+    <div id="tailscale-indicator" class="connected">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+      </svg>
+      <span>Connected via Tailscale</span>
+    </div>
+    <script>
+      // Hide project sync warning
+      document.addEventListener('DOMContentLoaded', function() {
+        var syncWarning = document.querySelector('[data-testid="project-sync"]') || 
+                         document.querySelector('.project-sync-warning') ||
+                         document.querySelector('.sync-warning');
+        if (syncWarning) syncWarning.style.display = 'none';
+      });
+    </script>
   </body>
 </html>

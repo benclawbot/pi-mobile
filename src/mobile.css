@@ -1,6 +1,6 @@
-/* Mobile-first CSS overrides for howcode */
+/* Mobile-first CSS for howcode - Pi-Mobile */
 
-/* Reset & base */
+/* Base reset */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -8,7 +8,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html, body, #root {
+html, body {
   height: 100%;
   width: 100%;
   overflow: hidden;
@@ -23,219 +23,198 @@ body {
   overscroll-behavior: none;
 }
 
-/* Hide desktop-only elements on mobile */
-.desktop-only,
-[data-desktop-only],
-[class*="desktop-only"] {
-  display: none !important;
-}
-
-/* Mobile layout wrapper */
-.mobile-wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* Mobile header */
-.mobile-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 56px;
-  background: rgba(26, 26, 46, 0.95);
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  z-index: 100;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Mobile content area */
-.mobile-content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-top: 56px;
-  padding-bottom: 56px;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Mobile bottom bar */
-.mobile-bottom-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 56px;
-  background: rgba(26, 26, 46, 0.95);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  z-index: 100;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Touch targets */
-button, a, input, select, textarea {
-  min-height: 44px;
-  min-width: 44px;
-}
-
-/* Tailscale badge */
-.tailscale-badge {
+/* Tailscale indicator - mobile optimized */
+#tailscale-indicator {
   position: fixed;
   top: 8px;
   right: 8px;
-  z-index: 101;
-  background: rgba(79, 172, 254, 0.15);
-  border: 1px solid rgba(79, 172, 254, 0.3);
-  color: #4facfe;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 10px;
   border-radius: 6px;
   font-size: 11px;
   font-weight: 500;
   backdrop-filter: blur(10px);
-  pointer-events: none;
 }
 
-/* Hamburger menu */
-.hamburger {
+#tailscale-indicator.connected {
+  background: rgba(80, 197, 116, 0.2);
+  border: 1px solid rgba(80, 197, 116, 0.4);
+  color: #50c574;
+}
+
+#tailscale-indicator.disconnected {
+  background: rgba(255, 107, 107, 0.2);
+  border: 1px solid rgba(255, 107, 107, 0.4);
+  color: #ff6b6b;
+}
+
+/* Mobile chat layout - full width at bottom */
+@media (max-width: 768px) {
+  /* App shell - full height */
+  [data-app-shell], #root > div {
+    height: 100vh !important;
+    height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Workspace area - takes remaining space */
+  [data-workspace], [data-workspace-view], .workspace-view {
+    flex: 1 !important;
+    overflow: hidden !important;
+    min-height: 0 !important;
+  }
+  
+  /* Thread/chat timeline - scrollable middle */
+  [data-thread], [data-timeline], .thread-timeline, .thread-container {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    min-height: 0 !important;
+  }
+  
+  /* Composer/chat input - full width at BOTTOM */
+  [data-composer], [data-composer-dock], .composer-dock, .composer, .chat-composer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    border-top: 1px solid var(--border, rgba(255,255,255,0.1)) !important;
+    z-index: 100 !important;
+    margin: 0 !important;
+    padding: 12px !important;
+  }
+  
+  /* Sidebar - full overlay on mobile */
+  [data-sidebar], .sidebar, .sidebar-panel {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 85% !important;
+    max-width: 320px !important;
+    height: 100% !important;
+    z-index: 1000 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s ease !important;
+  }
+  
+  [data-sidebar].open, .sidebar.open, .sidebar-panel.open {
+    transform: translateX(0) !important;
+  }
+  
+  /* Sidebar overlay */
+  .sidebar-overlay, .sidebar-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0,0,0,0.5) !important;
+    z-index: 999 !important;
+  }
+  
+  /* Hide project sync warning */
+  [data-testid="project-sync"], 
+  .project-sync-warning, 
+  .sync-warning,
+  [data-desktop-bridge-required],
+  .desktop-bridge-required {
+    display: none !important;
+  }
+  
+  /* Mobile touch targets */
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Terminal - full screen on mobile */
+  [data-terminal], .terminal-panel, .terminal-view {
+    height: 100% !important;
+    width: 100% !important;
+  }
+  
+  /* File tree - smaller fonts */
+  .file-tree, .file-tree-item {
+    font-size: 13px !important;
+  }
+  
+  /* Diff panel - full width */
+  .diff-panel, .diff-view {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Bottom safe area for notched phones */
+  body {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
+
+/* Hamburger menu button */
+.hamburger-btn {
   position: fixed;
   top: 8px;
   left: 8px;
-  z-index: 101;
-  width: 40px;
-  height: 40px;
-  background: rgba(26, 26, 46, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1001;
+  width: 44px;
+  height: 44px;
+  background: rgba(26, 26, 46, 0.95);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  color: #e0e0e0;
   backdrop-filter: blur(10px);
 }
 
-.hamburger span {
+.hamburger-btn span {
   display: block;
   width: 18px;
   height: 2px;
-  background: #e0e0e0;
+  background: currentColor;
   position: relative;
-  transition: all 0.3s ease;
 }
 
-.hamburger span::before,
-.hamburger span::after {
+.hamburger-btn span::before,
+.hamburger-btn span::after {
   content: '';
   position: absolute;
   width: 18px;
   height: 2px;
-  background: #e0e0e0;
+  background: currentColor;
   left: 0;
-  transition: all 0.3s ease;
 }
 
-.hamburger span::before { top: -5px; }
-.hamburger span::after { top: 5px; }
+.hamburger-btn span::before { top: -5px; }
+.hamburger-btn span::after { top: 5px; }
 
-.hamburger.active span { background: transparent; }
-.hamburger.active span::before { transform: rotate(45deg); top: 0; }
-.hamburger.active span::after { transform: rotate(-45deg); top: 0; }
-
-/* Sidebar drawer */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -260px;
-  width: 260px;
-  height: 100%;
-  background: #16162a;
-  z-index: 1000;
-  transition: left 0.3s ease;
-  padding-top: 70px;
-  overflow-y: auto;
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
-}
-
-.sidebar.open { left: 0; }
-
-.sidebar-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 999;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-}
-
-.sidebar-overlay.visible {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Swipe indicator */
-.swipe-indicator {
-  position: fixed;
-  top: 50%;
-  left: 4px;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 50px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-  z-index: 50;
-}
-
-/* Menu items */
-.menu-item {
+/* Loading state */
+.bootstrap-loading {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  color: #b0b0b0;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border-left: 3px solid transparent;
-  cursor: pointer;
+  justify-content: center;
+  height: 100vh;
+  height: 100dvh;
+  background: #1a1a2e;
 }
 
-.menu-item:hover,
-.menu-item.active {
-  background: rgba(108, 92, 231, 0.15);
-  color: #fff;
-  border-left-color: #6c5ce7;
+.bootstrap-loading::after {
+  content: '';
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: #6c5ce7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.menu-item svg { flex-shrink: 0; }
-
-/* Status items */
-.status-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  color: #666;
-  font-size: 9px;
-  cursor: pointer;
-  padding: 6px 12px;
-  transition: color 0.2s;
-}
-
-.status-item.active { color: #6c5ce7; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
@@ -248,87 +227,8 @@ button, a, input, select, textarea {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255,255,255,0.2);
   border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* Loading state */
-.loading-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: calc(100vh - 112px);
-  margin-top: 56px;
-}
-
-.loading {
-  text-align: center;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #6c5ce7;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 12px;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.loading p {
-  color: #888;
-  font-size: 13px;
-}
-
-/* PWA install prompt */
-.install-prompt {
-  position: fixed;
-  bottom: 56px;
-  left: 16px;
-  right: 16px;
-  background: #16162a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 16px;
-  transform: translateY(150%);
-  transition: transform 0.3s ease;
-  z-index: 1001;
-}
-
-.install-prompt.visible { transform: translateY(0); }
-
-.install-prompt button {
-  width: 100%;
-  padding: 12px;
-  background: #6c5ce7;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* Howcode app styles - override for mobile */
-#root > * {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-/* Responsive panels */
-@media (max-width: 768px) {
-  .panel,
-  .sidebar-panel,
-  [class*="panel"] {
-    width: 100% !important;
-    min-width: 100% !important;
-  }
 }
 
 /* Error state */
@@ -338,4 +238,5 @@ button, a, input, select, textarea {
   white-space: pre-wrap;
   word-break: break-all;
   font-size: 12px;
+  font-family: monospace;
 }

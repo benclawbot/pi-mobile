@@ -1,18 +1,22 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
-import path from 'path';
 
 export default defineConfig({
+  // Build from public/ which has the pre-built howcode assets
+  root: 'public',
+  publicDir: false,
+  build: {
+    outDir: '../../dist',
+    emptyOutDir: true,
+  },
   plugins: [
-    react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'robots.txt'],
+      includeAssets: ['favicon.svg', 'assets/**/*'],
       manifest: {
         name: 'Pi-Mobile',
         short_name: 'Pi',
-        description: 'Mobile-first PWA wrapper for howcode with Tailscale support',
+        description: 'Mobile-first PWA for howcode with Tailscale support',
         theme_color: '#1a1a2e',
         background_color: '#1a1a2e',
         display: 'standalone',
@@ -28,58 +32,25 @@ export default defineConfig({
           {
             src: '/icons/icon-512.svg',
             sizes: '512x512',
-            type: 'image/svg+xml'
-          },
-          {
-            src: '/icons/icon-512.svg',
-            sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'maskable'
           }
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'gstatic-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          }
-        ]
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}']
       }
     })
   ],
-  build: {
-    outDir: 'dist',
-    sourcemap: true
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    }
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: false,
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      'pcmaison.tail94f992.ts.net',
+      'pcmaison'
+    ],
   }
 });
