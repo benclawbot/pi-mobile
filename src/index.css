@@ -1,0 +1,274 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  touch-action: manipulation;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mobile-first touch targets */
+button, a, input, select {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Loading state */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 100px);
+}
+
+.loading {
+  text-align: center;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #333;
+  border-top-color: #6c5ce7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading p {
+  color: #888;
+  font-size: 14px;
+}
+
+/* Hamburger menu */
+.hamburger {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1001;
+  width: 44px;
+  height: 44px;
+  background: rgba(26, 26, 46, 0.9);
+  border: 1px solid #333;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #e0e0e0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.hamburger span::before,
+.hamburger span::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 2px;
+  background: #e0e0e0;
+  left: 0;
+  transition: all 0.3s ease;
+}
+
+.hamburger span::before { top: -6px; }
+.hamburger span::after { top: 6px; }
+
+.hamburger.active span {
+  background: transparent;
+}
+
+.hamburger.active span::before {
+  transform: rotate(45deg);
+  top: 0;
+}
+
+.hamburger.active span::after {
+  transform: rotate(-45deg);
+  top: 0;
+}
+
+/* Sidebar drawer */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100%;
+  background: #16162a;
+  z-index: 1000;
+  transition: left 0.3s ease;
+  padding-top: 80px;
+  overflow-y: auto;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.sidebar-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Swipe gesture */
+.swipe-indicator {
+  position: fixed;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60px;
+  background: #333;
+  border-radius: 2px;
+  z-index: 998;
+  opacity: 0.5;
+}
+
+/* Tailscale badge */
+.tailscale-badge {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  background: rgba(79, 172, 254, 0.15);
+  border: 1px solid rgba(79, 172, 254, 0.3);
+  color: #4facfe;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
+
+/* Menu items */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  color: #b0b0b0;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  background: rgba(108, 92, 231, 0.1);
+  color: #fff;
+  border-left-color: #6c5ce7;
+}
+
+.menu-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Main content */
+.main-content {
+  min-height: 100vh;
+  padding-top: 60px;
+}
+
+/* PWA install prompt */
+.install-prompt {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #16162a;
+  border-top: 1px solid #333;
+  padding: 16px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  z-index: 1002;
+}
+
+.install-prompt.visible {
+  transform: translateY(0);
+}
+
+.install-prompt button {
+  width: 100%;
+  padding: 14px;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Status bar */
+.status-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: #16162a;
+  border-top: 1px solid #333;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #666;
+  font-size: 10px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.status-item.active {
+  color: #6c5ce7;
+}
+
+.status-item svg {
+  width: 24px;
+  height: 24px;
+}

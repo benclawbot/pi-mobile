@@ -1,0 +1,9 @@
+node_modules/
+dist/
+build/
+howcode-src/
+*.local
+.env
+.env.*
+!.env.example
+dist-pages/
