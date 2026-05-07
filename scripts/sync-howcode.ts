@@ -77,21 +77,34 @@ async function syncHowcode(): Promise<void> {
   await runCommand('npm', ['exec', '--', 'vite', 'build', '--config', 'pages/vite.config.ts'], HOWCODE_PATH);
   console.log('');
 
-  // Clean destination public folder (keep icons)
+  // Clean destination public folder (keep icons and our custom index.html)
   console.log('🧹 Cleaning previous build...');
   if (existsSync(DEST_PUBLIC)) {
     const files = await readdir(DEST_PUBLIC);
     for (const file of files) {
-      if (file !== 'icons' && file !== 'favicon.svg') {
+      if (file !== 'icons' && file !== 'favicon.svg' && file !== 'index.html') {
         await rm(join(DEST_PUBLIC, file), { recursive: true, force: true });
       }
     }
+  }
+  
+  // Read existing index.html to preserve our mobile wrapper
+  const existingIndexPath = join(DEST_PUBLIC, 'index.html');
+  let existingIndexContent = '';
+  if (existsSync(existingIndexPath)) {
+    existingIndexContent = await readFile(existingIndexPath, 'utf-8');
   }
 
   // Copy built assets from main dist
   console.log('📁 Copying main app assets...');
   await copyDir(HOWCODE_DIST, DEST_PUBLIC);
   console.log('   ✓ dist/');
+  
+  // Restore our mobile wrapper index.html
+  if (existingIndexContent) {
+    await writeFile(existingIndexPath, existingIndexContent);
+    console.log('   ✓ index.html (mobile wrapper preserved)');
+  }
 
   // Copy pages to public/howcode/
   console.log('📁 Copying landing page...');

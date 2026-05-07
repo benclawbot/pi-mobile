@@ -4,7 +4,7 @@
   "private": true,
   "description": "Mobile-first PWA wrapper for howcode with Tailscale support",
   "scripts": {
-    "dev": "npm run sync && npx serve public -l 5173 -s",
+    "dev": "npx serve public -l 5173",
     "dev:watch": "npm run sync && npx serve public -l 5173 -s",
     "sync": "tsx scripts/sync-howcode.ts",
     "build": "npm run sync && npm run build:pwa",
@@ -12,9 +12,9 @@
     "preview": "npx serve dist -l 5173 -s"
   },
   "devDependencies": {
+    "tsx": "^4.19.4",
     "typescript": "^6.0.3",
     "vite": "^8.0.10",
-    "vite-plugin-pwa": "^0.21.1",
-    "tsx": "^4.19.4"
+    "vite-plugin-pwa": "^0.21.1"
   }
 }
