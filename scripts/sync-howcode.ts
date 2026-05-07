@@ -8,7 +8,7 @@
  * 2. Installs howcode deps if needed
  * 3. Builds howcode's web UI (src/) and pages
  * 4. Copies built assets to pi-mobile public/
- * 5. Updates the index.html to load howcode properly
+ * 5. Preserves the mobile wrapper index.html
  */
 
 import { cp, rm, readdir, writeFile, readFile } from 'fs/promises';
@@ -77,7 +77,7 @@ async function syncHowcode(): Promise<void> {
   await runCommand('npm', ['exec', '--', 'vite', 'build', '--config', 'pages/vite.config.ts'], HOWCODE_PATH);
   console.log('');
 
-  // Clean destination public folder (keep icons and our custom index.html)
+  // Clean destination public folder (keep icons, favicon.svg and our custom index.html)
   console.log('🧹 Cleaning previous build...');
   if (existsSync(DEST_PUBLIC)) {
     const files = await readdir(DEST_PUBLIC);
@@ -88,23 +88,19 @@ async function syncHowcode(): Promise<void> {
     }
   }
   
-  // Read existing index.html to preserve our mobile wrapper
+  // CRITICAL: Read existing index.html BEFORE copying dist to preserve our mobile wrapper
   const existingIndexPath = join(DEST_PUBLIC, 'index.html');
-  let existingIndexContent = '';
-  if (existsSync(existingIndexPath)) {
-    existingIndexContent = await readFile(existingIndexPath, 'utf-8');
-  }
+  const existingIndexContent = await readFile(existingIndexPath, 'utf-8');
+  console.log('   ✓ Saved existing mobile wrapper');
 
   // Copy built assets from main dist
   console.log('📁 Copying main app assets...');
   await copyDir(HOWCODE_DIST, DEST_PUBLIC);
   console.log('   ✓ dist/');
   
-  // Restore our mobile wrapper index.html
-  if (existingIndexContent) {
-    await writeFile(existingIndexPath, existingIndexContent);
-    console.log('   ✓ index.html (mobile wrapper preserved)');
-  }
+  // CRITICAL: Restore our mobile wrapper AFTER copying dist
+  await writeFile(existingIndexPath, existingIndexContent);
+  console.log('   ✓ index.html (mobile wrapper restored)');
 
   // Copy pages to public/howcode/
   console.log('📁 Copying landing page...');
@@ -112,105 +108,10 @@ async function syncHowcode(): Promise<void> {
   await copyDir(HOWCODE_DIST_PAGES, howcodeDir);
   console.log('   ✓ howcode/');
 
-  // Update root index.html to redirect to howcode or show loading
-  const rootIndexPath = join(PROJECT_ROOT, 'index.html');
-  const rootIndexContent = `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#1a1a2e" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>Pi-Mobile</title>
-    <script>
-      // Redirect to howcode app
-      window.location.href = '/howcode/index.html';
-    </script>
-  </head>
-  <body>
-    <noscript>
-      <p>Redirecting to Pi...</p>
-      <a href="/howcode/">Open Pi</a>
-    </noscript>
-  </body>
-</html>`;
-  await writeFile(rootIndexPath, rootIndexContent);
-  console.log('   ✓ index.html (redirect)');
-
-  // Create a standalone index that loads the full app
-  const appIndexPath = join(DEST_PUBLIC, 'index.html');
-  const appIndexContent = `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#1a1a2e" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>Pi</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>`;
-  await writeFile(appIndexPath, appIndexContent);
-  console.log('   ✓ app index');
-
-  // Create the mobile-first app entry
-  const srcDir = join(PROJECT_ROOT, 'src');
-  const howcodeSrcDir = join(HOWCODE_PATH, 'src');
-  const howcodeMainTsx = join(howcodeSrcDir, 'main.tsx');
-  const howcodeStyles = join(howcodeSrcDir, 'styles.css');
-  
-  // Copy howcode source for the app
-  await cp(howcodeSrcDir, srcDir, { recursive: true, force: true });
-  
-  // Copy howcode styles
-  await cp(howcodeStyles, join(srcDir, 'styles.css'), { force: true });
-
-  // Update src/main.tsx to be mobile-friendly
-  const mobileMainContent = `import { QueryClientProvider } from '@tanstack/react-query'
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import '@xterm/xterm/css/xterm.css'
-import '@fontsource-variable/inter'
-import './styles.css'
-import App from './app'
-import { applyStoredPiGuiTheme } from './app/app-shell/usePiGuiTheme'
-import { queryClient } from './app/query/query-client'
-
-// Mobile-optimized: no dev-web-bridge, no react-grab
-window.howcodeLoaded = true
-
-try {
-  applyStoredPiGuiTheme()
-  ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>
-    </React.StrictMode>,
-  )
-} catch (error) {
-  const root = document.getElementById('root')
-  if (root) {
-    root.innerHTML = \`<pre class="bootstrap-error">Bootstrap error:\n\${String(error)}</pre>\`
-  }
-
-  throw error
-}
-`;
-  await writeFile(join(srcDir, 'main.tsx'), mobileMainContent);
-
   console.log('\n✅ Sync complete!');
-  console.log('   Run: npm run dev   (for local dev at http://localhost:5173)');
-  console.log('   Run: npm run build (for production PWA)');
+  console.log('   Run: node server.js   (to start the server)');
   console.log('');
-  console.log('📱 Access on mobile via Tailscale at http://<your-tailnet-ip>:5173');
+  console.log('📱 Access on mobile via Tailscale at http://pcmaison.tail94f992.ts.net:5173');
 }
 
 syncHowcode().catch((err) => {

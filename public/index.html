@@ -43,39 +43,76 @@
         height: 14px;
       }
       
-      /* Mobile CSS overrides */
+      /* Mobile CSS - hide desktop-only elements and reposition chat */
       @media (max-width: 768px) {
         /* Hide project sync warning */
+        .sidebar-projects-section > div:last-child,
         [data-testid="project-sync"], 
         .project-sync-warning, 
         .sync-warning,
         [data-desktop-bridge-required],
-        .desktop-bridge-required {
+        .desktop-bridge-required,
+        .no-projects-message,
+        .projects-section-error {
           display: none !important;
         }
         
-        /* Full width chat at bottom */
-        [data-composer], .composer-dock, .composer {
+        /* Hide projects sidebar section entirely on mobile */
+        [data-testid="sidebar-projects-section"],
+        .sidebar-projects-section {
+          display: none !important;
+        }
+        
+        /* Full width chat input at bottom */
+        .composer-panel,
+        .composer-prompt-surface,
+        .composer,
+        [class*="composer"][class*="panel"],
+        [class*="composer"][class*="surface"],
+        [class*="composer-dock"] {
           position: fixed !important;
           bottom: 0 !important;
           left: 0 !important;
           right: 0 !important;
           width: 100% !important;
+          max-width: 100% !important;
           border-radius: 0 !important;
           border-top: 1px solid var(--border, rgba(255,255,255,0.1)) !important;
+          z-index: 100 !important;
         }
         
-        /* Scrollable thread area */
-        [data-thread-timeline], .thread-timeline {
+        /* Thread/chat area above composer */
+        .thread-timeline,
+        .thread-container,
+        [class*="thread"][class*="timeline"],
+        [class*="workspace"][class*="content"] {
           flex: 1 !important;
           overflow-y: auto !important;
           -webkit-overflow-scrolling: touch;
+          padding-bottom: 120px !important;
         }
         
-        /* Workspace full height */
-        [data-app-shell], [data-workspace-view] {
+        /* Full height workspace */
+        .workspace-view,
+        .app-shell-workspace,
+        [class*="workspace"][class*="view"] {
           height: 100vh !important;
           height: 100dvh !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
+        
+        /* Hide hover-to-type composer (mobile uses tap) */
+        .hover-to-type-composer {
+          display: none !important;
+        }
+        
+        /* Fix input field styling */
+        .composer-input,
+        .composer-textarea,
+        textarea[class*="composer"] {
+          font-size: 16px !important;
+          min-height: 44px !important;
         }
       }
       
@@ -110,12 +147,38 @@
       <span>Tailscale</span>
     </div>
     <script>
-      // Hide project sync warning
+      // Mobile-specific fixes
       document.addEventListener('DOMContentLoaded', function() {
+        // Hide project sync warning (desktop bridge not available on mobile)
+        var projectSection = document.querySelector('[data-testid="sidebar-projects-section"]') ||
+                            document.querySelector('.sidebar-projects-section');
+        if (projectSection) {
+          projectSection.style.display = 'none';
+        }
+        
+        // Also check for the error message directly
         var syncWarning = document.querySelector('[data-testid="project-sync"]') || 
                          document.querySelector('.project-sync-warning') ||
-                         document.querySelector('.sync-warning');
-        if (syncWarning) syncWarning.style.display = 'none';
+                         document.querySelector('.sync-warning') ||
+                         document.querySelector('.no-projects-message');
+        if (syncWarning) {
+          syncWarning.style.display = 'none';
+        }
+        
+        // Make composer always visible on mobile (no hover)
+        var composer = document.querySelector('.composer-panel') ||
+                      document.querySelector('[class*="composer"][class*="panel"]');
+        if (composer) {
+          composer.style.opacity = '1';
+          composer.style.pointerEvents = 'auto';
+        }
+      });
+      
+      // Trick: Tell the app we're not using dev web bridge
+      // This makes it skip the desktop bridge check
+      Object.defineProperty(window, 'howcodeDevWebBridge', {
+        get: function() { return false; },
+        configurable: true
       });
     </script>
   </body>
