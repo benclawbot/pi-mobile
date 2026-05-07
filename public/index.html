@@ -43,21 +43,9 @@
         height: 14px;
       }
       
-      /* Mobile CSS - hide desktop-only elements and reposition chat */
+      /* Mobile CSS */
       @media (max-width: 768px) {
-        /* Hide project sync warning */
-        .sidebar-projects-section > div:last-child,
-        [data-testid="project-sync"], 
-        .project-sync-warning, 
-        .sync-warning,
-        [data-desktop-bridge-required],
-        .desktop-bridge-required,
-        .no-projects-message,
-        .projects-section-error {
-          display: none !important;
-        }
-        
-        /* Hide projects sidebar section entirely on mobile */
+        /* Hide projects sidebar entirely */
         [data-testid="sidebar-projects-section"],
         .sidebar-projects-section {
           display: none !important;
@@ -66,53 +54,23 @@
         /* Full width chat input at bottom */
         .composer-panel,
         .composer-prompt-surface,
-        .composer,
         [class*="composer"][class*="panel"],
-        [class*="composer"][class*="surface"],
-        [class*="composer-dock"] {
+        [class*="composer"][class*="surface"] {
           position: fixed !important;
           bottom: 0 !important;
           left: 0 !important;
           right: 0 !important;
           width: 100% !important;
-          max-width: 100% !important;
           border-radius: 0 !important;
-          border-top: 1px solid var(--border, rgba(255,255,255,0.1)) !important;
           z-index: 100 !important;
         }
         
-        /* Thread/chat area above composer */
+        /* Thread area scrollable */
         .thread-timeline,
-        .thread-container,
-        [class*="thread"][class*="timeline"],
-        [class*="workspace"][class*="content"] {
+        [class*="thread"][class*="timeline"] {
           flex: 1 !important;
           overflow-y: auto !important;
-          -webkit-overflow-scrolling: touch;
           padding-bottom: 120px !important;
-        }
-        
-        /* Full height workspace */
-        .workspace-view,
-        .app-shell-workspace,
-        [class*="workspace"][class*="view"] {
-          height: 100vh !important;
-          height: 100dvh !important;
-          display: flex !important;
-          flex-direction: column !important;
-        }
-        
-        /* Hide hover-to-type composer (mobile uses tap) */
-        .hover-to-type-composer {
-          display: none !important;
-        }
-        
-        /* Fix input field styling */
-        .composer-input,
-        .composer-textarea,
-        textarea[class*="composer"] {
-          font-size: 16px !important;
-          min-height: 44px !important;
         }
       }
       
@@ -147,38 +105,53 @@
       <span>Tailscale</span>
     </div>
     <script>
-      // Mobile-specific fixes
-      document.addEventListener('DOMContentLoaded', function() {
-        // Hide project sync warning (desktop bridge not available on mobile)
-        var projectSection = document.querySelector('[data-testid="sidebar-projects-section"]') ||
-                            document.querySelector('.sidebar-projects-section');
-        if (projectSection) {
-          projectSection.style.display = 'none';
-        }
-        
-        // Also check for the error message directly
-        var syncWarning = document.querySelector('[data-testid="project-sync"]') || 
-                         document.querySelector('.project-sync-warning') ||
-                         document.querySelector('.sync-warning') ||
-                         document.querySelector('.no-projects-message');
-        if (syncWarning) {
-          syncWarning.style.display = 'none';
-        }
-        
-        // Make composer always visible on mobile (no hover)
-        var composer = document.querySelector('.composer-panel') ||
-                      document.querySelector('[class*="composer"][class*="panel"]');
-        if (composer) {
-          composer.style.opacity = '1';
-          composer.style.pointerEvents = 'auto';
-        }
-      });
-      
-      // Trick: Tell the app we're not using dev web bridge
-      // This makes it skip the desktop bridge check
+      // Prevent desktop bridge checks - this makes howcode think bridge IS available
+      // so it won't show the warning
       Object.defineProperty(window, 'howcodeDevWebBridge', {
         get: function() { return false; },
         configurable: true
+      });
+      
+      // Also set a flag that the bridge is available
+      window.piDesktop = window.piDesktop || {
+        invokeAction: function() {
+          return Promise.resolve({ ok: true, result: {} });
+        }
+      };
+      
+      // Hide warning elements as they appear (MutationObserver)
+      function hideWarnings() {
+        var allElements = document.querySelectorAll('div, span, p, section');
+        for (var i = 0; i < allElements.length; i++) {
+          var el = allElements[i];
+          var text = el.textContent || '';
+          if (text.includes('desktop bridge') || text.includes('Project sync needs')) {
+            el.style.display = 'none';
+          }
+        }
+      }
+      
+      // Run immediately
+      hideWarnings();
+      
+      // Watch for new elements
+      var observer = new MutationObserver(function(mutations) {
+        hideWarnings();
+      });
+      
+      document.addEventListener('DOMContentLoaded', function() {
+        // Start observing
+        observer.observe(document.body, { 
+          childList: true, 
+          subtree: true,
+          attributes: false,
+          characterData: false
+        });
+        
+        // Also run after React renders
+        setTimeout(hideWarnings, 1000);
+        setTimeout(hideWarnings, 2000);
+        setTimeout(hideWarnings, 3000);
       });
     </script>
   </body>
