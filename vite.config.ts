@@ -75,19 +75,7 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
-    sourcemap: true,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor-react': /node_modules\/(react|react-dom|scheduler)/,
-          'vendor-pi': /node_modules\/@earendil-works/,
-          'vendor-dnd': /node_modules\/@dnd-kit/,
-          'vendor-tanstack': /node_modules\/@tanstack/,
-          'vendor-xterm': /node_modules\/@xterm/,
-          'vendor-ui': /node_modules\/(lucide-react|react-grab)/,
-        }
-      }
-    }
+    sourcemap: true
   },
   resolve: {
     alias: {
