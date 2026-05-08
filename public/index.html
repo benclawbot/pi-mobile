@@ -94,6 +94,46 @@
           opacity: 1 !important;
           visibility: visible !important;
         }
+        
+        /* Make model selector popover WORK on mobile */
+        [data-radix-popper-content-wrapper],
+        [data-radix-popper-content-wrapper] * {
+          pointer-events: auto !important;
+          touch-action: manipulation !important;
+        }
+        
+        /* Ensure popover portal is visible */
+        [data-radix-portal] {
+          position: fixed !important;
+          z-index: 10000 !important;
+        }
+        
+        /* Fix any z-index issues with popovers */
+        [role="menu"],
+        [role="menu"] * {
+          pointer-events: auto !important;
+        }
+        
+        /* Model popover button styling */
+        [aria-controls="composer-model-menu"],
+        button:has([class*="Bot"]) {
+          pointer-events: auto !important;
+          touch-action: manipulation !important;
+        }
+        
+        /* Ensure toolbar buttons are clickable */
+        .toolbar-button,
+        button[class*="toolbar"],
+        [class*="workspace-footer"] button {
+          pointer-events: auto !important;
+          touch-action: manipulation !important;
+          -webkit-tap-highlight-color: transparent !important;
+        }
+        
+        /* Ensure all buttons in footer are interactive */
+        .workspace-footer * {
+          pointer-events: auto !important;
+        }
       }
       
       /* Loading spinner */
@@ -127,14 +167,12 @@
       <span>Tailscale</span>
     </div>
     <script>
-      // Prevent desktop bridge checks - this makes howcode think bridge IS available
-      // so it won't show the warning
+      // Prevent desktop bridge checks
       Object.defineProperty(window, 'howcodeDevWebBridge', {
         get: function() { return false; },
         configurable: true
       });
       
-      // Also set a flag that the bridge is available
       window.piDesktop = window.piDesktop || {
         invokeAction: function() {
           return Promise.resolve({ ok: true, result: {} });
@@ -153,16 +191,13 @@
         }
       }
       
-      // Run immediately
       hideWarnings();
       
-      // Watch for new elements
       var observer = new MutationObserver(function(mutations) {
         hideWarnings();
       });
       
       document.addEventListener('DOMContentLoaded', function() {
-        // Start observing
         observer.observe(document.body, { 
           childList: true, 
           subtree: true,
@@ -170,17 +205,20 @@
           characterData: false
         });
         
-        // Also run after React renders
         setTimeout(hideWarnings, 1000);
         setTimeout(hideWarnings, 2000);
         setTimeout(hideWarnings, 3000);
       });
       
-      // Add mobile mode class
       if (window.innerWidth < 768) {
         document.documentElement.classList.add('mobile-mode');
         document.body.classList.add('mobile-mode');
       }
+      
+      // Debug: Log any console errors for model selector
+      window.addEventListener('error', function(e) {
+        console.log('Error:', e.message);
+      });
     </script>
   </body>
 </html>
