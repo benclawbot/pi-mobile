@@ -54,3 +54,16 @@ The following files in `howcode-submodule/` contain mobile-specific modification
 - Desktop: `pcmainen` at 100.69.199.38
 - Phone: CMF Phone2Pro at 100.117.143.50
 - Tailscale suffix: `tail94f992.ts.net`
+
+### Historical Session References
+Old file hashes (e.g., `index-COW9obSh.js`) may appear in pi agent session JSONL files.
+These are **historical records only** - do not reference or search for them.
+Current correct hashes are documented above.
+
+### Hash Update Process
+When howcode rebuilds, assets get new content hashes. After each `npm run sync`:
+1. Check `public/assets/index-*.js` for the new hash
+2. Update `public/index.html` `<script src=...>` to match
+3. Commit the change
+
+**Never hardcode old hashes** - always verify the current build output.
