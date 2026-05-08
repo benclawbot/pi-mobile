@@ -240,3 +240,41 @@ body {
   font-size: 12px;
   font-family: monospace;
 }
+
+/* Hide artifacts panel on mobile */
+@media (max-width: 768px) {
+  /* Hide the entire artifacts drawer area */
+  [data-open="true"].motion-terminal-drawer,
+  .motion-terminal-drawer[data-open="true"],
+  [class*="artifact-drawer"],
+  [class*="artifact-drawer"] [class*="drawer"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Force artifacts panel closed on mobile */
+  [data-artifact-panel],
+  [data-artifact-panel] * {
+    display: none !important;
+  }
+}
+
+/* Hide agent/artifacts sidebar on mobile */
+@media (max-width: 768px) {
+  /* Hide any panel showing next to or below chat */
+  .terminal-drawer,
+  [data-terminal-drawer],
+  .artifact-drawer,
+  [data-artifact-drawer],
+  [data-agent-view] {
+    display: none !important;
+  }
+  
+  /* Hide agent section below composer */
+  [data-view="agent"],
+  [data-view="artifacts"],
+  .agent-view,
+  .artifacts-view {
+    display: none !important;
+  }
+}
