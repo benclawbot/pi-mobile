@@ -6,219 +6,158 @@
     <meta name="theme-color" content="#1a1a2e" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="description" content="Pi-Mobile is a mobile-first PWA wrapper for howcode with Tailscale support" />
-    <title>Pi — code with agents, no pretend IDE</title>
+    <meta name="description" content="Pi — code with agents, no pretend IDE" />
+    <title>Pi — code with agents</title>
     <link rel="icon" href="/favicon.svg" />
-    <script type="module" crossorigin src="/assets/index-CJy9R63G.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-mCl6wPTb.css">
     <style>
-      /* Tailscale status indicator */
-      #tailscale-indicator {
-        position: fixed;
-        top: 8px;
-        right: 8px;
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 500;
-        backdrop-filter: blur(10px);
-        pointer-events: none;
-      }
-      #tailscale-indicator.connected {
-        background: rgba(80, 197, 116, 0.2);
-        border: 1px solid rgba(80, 197, 116, 0.4);
-        color: #50c574;
-      }
-      #tailscale-indicator.disconnected {
-        background: rgba(255, 107, 107, 0.2);
-        border: 1px solid rgba(255, 107, 107, 0.4);
-        color: #ff6b6b;
-      }
-      #tailscale-indicator svg {
-        width: 14px;
-        height: 14px;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body, #root { height: 100%; width: 100%; overflow: hidden; }
+      body { font-family: 'Inter', -apple-system, sans-serif; background: #1a1a2e; color: #e0e0e0; }
       
-      /* Mobile CSS */
-      @media (max-width: 768px) {
-        /* Hide projects sidebar entirely */
-        [data-testid="sidebar-projects-section"],
-        .sidebar-projects-section {
-          display: none !important;
-        }
-        
-        /* Make composer panel always visible on mobile */
-        .composer-panel,
-        .composer-prompt-surface,
-        [class*="composer"][class*="panel"],
-        [data-testid="composer-panel"] {
-          opacity: 1 !important;
-          pointer-events: auto !important;
-          visibility: visible !important;
-          position: fixed !important;
-          bottom: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          width: 100% !important;
-          z-index: 1000 !important;
-        }
-        
-        /* Make composer input always focusable */
-        .composer-textarea,
-        .composer-input,
-        textarea[class*="composer"],
-        [class*="composer"][class*="textarea"],
-        [data-testid="composer-textarea"] {
-          pointer-events: auto !important;
-          opacity: 1 !important;
-          visibility: visible !important;
-        }
-        
-        /* Chat timeline should be scrollable above composer */
-        .thread-timeline,
-        [class*="thread"][class*="timeline"],
-        .thread-container {
-          padding-bottom: 140px !important;
-          flex: 1 !important;
-          overflow-y: auto !important;
-          -webkit-overflow-scrolling: touch !important;
-        }
-        
-        /* Footer buttons should be visible */
-        .workspace-footer,
-        [class*="footer"][class*="workspace"] {
-          opacity: 1 !important;
-          visibility: visible !important;
-        }
-        
-        /* Make model selector popover WORK on mobile */
-        [data-radix-popper-content-wrapper],
-        [data-radix-popper-content-wrapper] * {
-          pointer-events: auto !important;
-          touch-action: manipulation !important;
-        }
-        
-        /* Ensure popover portal is visible */
-        [data-radix-portal] {
-          position: fixed !important;
-          z-index: 10000 !important;
-        }
-        
-        /* Fix any z-index issues with popovers */
-        [role="menu"],
-        [role="menu"] * {
-          pointer-events: auto !important;
-        }
-        
-        /* Model popover button styling */
-        [aria-controls="composer-model-menu"],
-        button:has([class*="Bot"]) {
-          pointer-events: auto !important;
-          touch-action: manipulation !important;
-        }
-        
-        /* Ensure toolbar buttons are clickable */
-        .toolbar-button,
-        button[class*="toolbar"],
-        [class*="workspace-footer"] button {
-          pointer-events: auto !important;
-          touch-action: manipulation !important;
-          -webkit-tap-highlight-color: transparent !important;
-        }
-        
-        /* Ensure all buttons in footer are interactive */
-        .workspace-footer * {
-          pointer-events: auto !important;
-        }
-      }
-      
-      /* Loading spinner */
-      .bootstrap-loading {
+      .loading-screen {
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 100vh;
-        background: #1a1a2e;
+        gap: 20px;
       }
-      .bootstrap-loading::after {
-        content: '';
-        width: 48px;
-        height: 48px;
-        border: 3px solid rgba(255,255,255,0.1);
-        border-top-color: #6c5ce7;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
+      .loading-emoji { font-size: 64px; animation: pulse 2s ease-in-out infinite; }
+      .loading-title { font-size: 28px; font-weight: 600; }
+      .loading-text { color: #888; font-size: 14px; }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+      
+      .bridge-status {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: rgba(26, 26, 46, 0.95);
+        border: 1px solid #333;
+        border-radius: 24px;
+        font-size: 13px;
+        backdrop-filter: blur(10px);
+        cursor: pointer;
+        transition: all 0.3s ease;
       }
-      @keyframes spin { to { transform: rotate(360deg); } }
+      .bridge-status.connected { border-color: #00b894; color: #00b894; }
+      .bridge-status.connecting { border-color: #f39c12; color: #f39c12; }
+      .bridge-status.disconnected { border-color: #e74c3c; color: #e74c3c; }
+      .bridge-dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+      .bridge-status.connecting .bridge-dot { animation: blink 1s ease-in-out infinite; }
+      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
   </head>
   <body>
     <div id="root">
-      <div class="bootstrap-loading"></div>
+      <div class="loading-screen">
+        <div class="loading-emoji">📱</div>
+        <div class="loading-title">Pi</div>
+        <div class="loading-text">Loading mobile interface...</div>
+      </div>
     </div>
-    <div id="tailscale-indicator" class="connected">
-      <svg viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-      </svg>
-      <span>Tailscale</span>
+    
+    <div id="bridge-status" class="bridge-status disconnected" onclick="toggleBridge()">
+      <span class="bridge-dot"></span>
+      <span id="bridge-text">Connecting...</span>
     </div>
+    
     <script>
-      // Prevent desktop bridge checks
-      Object.defineProperty(window, 'howcodeDevWebBridge', {
-        get: function() { return false; },
-        configurable: true
-      });
+      const DEFAULT_BRIDGE_URL = 'http://pcmainen.tail94f992.ts.net:5174';
       
-      window.piDesktop = window.piDesktop || {
-        invokeAction: function() {
-          return Promise.resolve({ ok: true, result: {} });
-        }
-      };
-      
-      // Hide warning elements as they appear (MutationObserver)
-      function hideWarnings() {
-        var allElements = document.querySelectorAll('div, span, p, section');
-        for (var i = 0; i < allElements.length; i++) {
-          var el = allElements[i];
-          var text = el.textContent || '';
-          if (text.includes('desktop bridge') || text.includes('Project sync needs')) {
-            el.style.display = 'none';
+      async function probeBridge(url) {
+        try {
+          const res = await fetch(url + '/__howcode/config', { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            return { ok: true, token: data.bridgeToken };
           }
+        } catch {}
+        return { ok: false };
+      }
+      
+      async function updateBridgeStatus() {
+        const status = document.getElementById('bridge-status');
+        const text = document.getElementById('bridge-text');
+        
+        let url = localStorage.getItem('pi-mobile-bridge-url');
+        if (!url) url = DEFAULT_BRIDGE_URL;
+        
+        status.className = 'bridge-status connecting';
+        text.textContent = 'Connecting...';
+        
+        const result = await probeBridge(url);
+        
+        if (result.ok && result.token) {
+          if (!localStorage.getItem('pi-mobile-bridge-token')) {
+            localStorage.setItem('pi-mobile-bridge-url', url);
+            localStorage.setItem('pi-mobile-bridge-token', result.token);
+          }
+          status.className = 'bridge-status connected';
+          text.textContent = 'Desktop Connected';
+        } else {
+          status.className = 'bridge-status disconnected';
+          text.textContent = 'Desktop Offline';
         }
       }
       
-      hideWarnings();
-      
-      var observer = new MutationObserver(function(mutations) {
-        hideWarnings();
-      });
-      
-      document.addEventListener('DOMContentLoaded', function() {
-        observer.observe(document.body, { 
-          childList: true, 
-          subtree: true,
-          attributes: false,
-          characterData: false
-        });
-        
-        setTimeout(hideWarnings, 1000);
-        setTimeout(hideWarnings, 2000);
-        setTimeout(hideWarnings, 3000);
-      });
-      
-      if (window.innerWidth < 768) {
-        document.documentElement.classList.add('mobile-mode');
-        document.body.classList.add('mobile-mode');
+      async function toggleBridge() {
+        const url = prompt('Enter bridge URL:', localStorage.getItem('pi-mobile-bridge-url') || DEFAULT_BRIDGE_URL);
+        if (url) {
+          localStorage.removeItem('pi-mobile-bridge-token');
+          localStorage.setItem('pi-mobile-bridge-url', url);
+          await updateBridgeStatus();
+        }
       }
       
-      // Debug: Log any console errors for model selector
-      window.addEventListener('error', function(e) {
-        console.log('Error:', e.message);
-      });
+      updateBridgeStatus();
+      setInterval(updateBridgeStatus, 30000);
     </script>
+    
+    <!-- Remote bridge shim - replaces window.piDesktop when using Tailscale -->
+    <script>
+      // Only activate if no local piDesktop exists
+      if (!window.piDesktop && localStorage.getItem('pi-mobile-bridge-token')) {
+        const remoteUrl = localStorage.getItem('pi-mobile-bridge-url');
+        const remoteToken = localStorage.getItem('pi-mobile-bridge-token');
+        
+        window.piDesktop = {
+          invokeAction: async (action, payload) => {
+            const res = await fetch(remoteUrl + '/__howcode/request/invokeAction', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-howcode-dev-web-bridge-token': remoteToken
+              },
+              body: JSON.stringify({ action, payload })
+            });
+            if (!res.ok) throw new Error('Bridge request failed');
+            return res.json();
+          },
+          subscribe: (callback) => {
+            const es = new EventSource(remoteUrl + '/__howcode/events/desktopEvent');
+            es.onmessage = (e) => callback(JSON.parse(e.data).event);
+            return () => es.close();
+          },
+          watchSession: async (path) => {
+            await fetch(remoteUrl + '/__howcode/request/watchSession', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-howcode-dev-web-bridge-token': remoteToken
+              },
+              body: JSON.stringify({ sessionPath: path })
+            });
+          }
+        };
+      }
+    </script>
+    
+    <!-- Load howcode app with updated hash -->
+    <script type="module" src="/assets/index-C0EnAqM4.js"></script>
   </body>
 </html>

@@ -2,11 +2,10 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  // Build from public/ which has the pre-built howcode assets
-  root: 'public',
-  publicDir: false,
+  // Build from src/ to dist-mobile/
+  root: 'src',
   build: {
-    outDir: '../../dist',
+    outDir: '../dist-mobile',
     emptyOutDir: true,
   },
   plugins: [
@@ -49,8 +48,8 @@ export default defineConfig({
     allowedHosts: [
       'localhost',
       '127.0.0.1',
-      'pcmaison.tail94f992.ts.net',
-      'pcmaison'
+      'pcmainen.tail94f992.ts.net',
+      'pcmainen'
     ],
   }
 });

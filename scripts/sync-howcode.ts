@@ -1,17 +1,10 @@
 #!/usr/bin/env tsx
 
 /**
- * Sync script - Builds howcode and prepares assets for Pi-Mobile PWA
- * 
- * This script:
- * 1. Checks if howcode submodule exists
- * 2. Installs howcode deps if needed
- * 3. Builds howcode's web UI (src/) and pages
- * 4. Copies built assets to pi-mobile public/
- * 5. Preserves the mobile wrapper index.html
+ * Sync script - Copies howcode build to Pi-Mobile public/
  */
 
-import { cp, rm, readdir, writeFile, readFile } from 'fs/promises';
+import { cp, rm, readdir } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
@@ -37,81 +30,53 @@ async function runCommand(cmd: string, args: string[], cwd: string): Promise<voi
 
 async function copyDir(src: string, dest: string): Promise<void> {
   if (!existsSync(src)) return;
-  
   const files = await readdir(src);
   for (const file of files) {
-    const srcPath = join(src, file);
-    const destPath = join(dest, file);
-    await cp(srcPath, destPath, { recursive: true });
+    await cp(join(src, file), join(dest, file), { recursive: true });
   }
 }
 
 async function syncHowcode(): Promise<void> {
-  console.log('🔄 Syncing howcode source...\n');
+  console.log('🔄 Syncing howcode...\n');
 
-  // Check if howcode submodule exists
   if (!existsSync(HOWCODE_PATH)) {
     console.error('❌ howcode-submodule not found.');
-    console.error('   Run: git submodule add https://github.com/benclawbot/howcode howcode-submodule');
     process.exit(1);
   }
 
-  // Check if package.json exists in howcode
-  if (!existsSync(join(HOWCODE_PATH, 'package.json'))) {
-    console.error('❌ howcode-submodule is empty or invalid.');
-    console.error('   Run: git submodule update --init --recursive');
-    process.exit(1);
-  }
-
-  console.log('📦 Installing howcode dependencies...');
+  // Install deps
+  console.log('📦 Installing dependencies...');
   await runCommand('npm', ['install', '--ignore-scripts'], HOWCODE_PATH);
-  console.log('');
-
-  // Build main app
-  console.log('🔨 Building howcode web app...');
+  
+  // Build howcode
+  console.log('🔨 Building howcode...');
   await runCommand('npm', ['exec', '--', 'vite', 'build'], HOWCODE_PATH);
-  console.log('');
-
-  // Build pages (landing page)
-  console.log('🔨 Building howcode pages...');
+  
+  // Build pages
+  console.log('🔨 Building pages...');
   await runCommand('npm', ['exec', '--', 'vite', 'build', '--config', 'pages/vite.config.ts'], HOWCODE_PATH);
-  console.log('');
 
-  // Clean destination public folder (keep icons, favicon.svg and our custom index.html)
-  console.log('🧹 Cleaning previous build...');
-  if (existsSync(DEST_PUBLIC)) {
-    const files = await readdir(DEST_PUBLIC);
-    for (const file of files) {
-      if (file !== 'icons' && file !== 'favicon.svg' && file !== 'index.html') {
-        await rm(join(DEST_PUBLIC, file), { recursive: true, force: true });
-      }
+  // Clean public (keep icons, favicon)
+  console.log('🧹 Cleaning public folder...');
+  const keepFiles = ['icons', 'favicon.svg', 'index.html'];
+  const files = await readdir(DEST_PUBLIC);
+  for (const file of files) {
+    if (!keepFiles.includes(file)) {
+      await rm(join(DEST_PUBLIC, file), { recursive: true, force: true });
     }
   }
-  
-  // CRITICAL: Read existing index.html BEFORE copying dist to preserve our mobile wrapper
-  const existingIndexPath = join(DEST_PUBLIC, 'index.html');
-  const existingIndexContent = await readFile(existingIndexPath, 'utf-8');
-  console.log('   ✓ Saved existing mobile wrapper');
 
-  // Copy built assets from main dist
-  console.log('📁 Copying main app assets...');
+  // Copy dist to public
+  console.log('📁 Copying howcode build...');
   await copyDir(HOWCODE_DIST, DEST_PUBLIC);
-  console.log('   ✓ dist/');
   
-  // CRITICAL: Restore our mobile wrapper AFTER copying dist
-  await writeFile(existingIndexPath, existingIndexContent);
-  console.log('   ✓ index.html (mobile wrapper restored)');
-
   // Copy pages to public/howcode/
   console.log('📁 Copying landing page...');
-  const howcodeDir = join(DEST_PUBLIC, 'howcode');
-  await copyDir(HOWCODE_DIST_PAGES, howcodeDir);
-  console.log('   ✓ howcode/');
+  await copyDir(HOWCODE_DIST_PAGES, join(DEST_PUBLIC, 'howcode'));
 
   console.log('\n✅ Sync complete!');
-  console.log('   Run: node server.js   (to start the server)');
-  console.log('');
-  console.log('📱 Access on mobile via Tailscale at http://pcmaison.tail94f992.ts.net:5173');
+  console.log('   Run: node server.js');
+  console.log('   Access: http://pcmainen.tail94f992.ts.net:5173');
 }
 
 syncHowcode().catch((err) => {
