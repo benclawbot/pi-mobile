@@ -118,9 +118,7 @@
       setInterval(updateBridgeStatus, 30000);
     </script>
     
-    <!-- Remote bridge shim - replaces window.piDesktop when using Tailscale -->
     <script>
-      // Only activate if no local piDesktop exists
       if (!window.piDesktop && localStorage.getItem('pi-mobile-bridge-token')) {
         const remoteUrl = localStorage.getItem('pi-mobile-bridge-url');
         const remoteToken = localStorage.getItem('pi-mobile-bridge-token');
@@ -157,7 +155,7 @@
       }
     </script>
     
-    <!-- Load howcode app with updated hash -->
+    <link rel="stylesheet" href="/assets/index-mCl6wPTb.css">
     <script type="module" src="/assets/index-C0EnAqM4.js"></script>
   </body>
 </html>
