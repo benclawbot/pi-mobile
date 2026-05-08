@@ -74,8 +74,54 @@
     <link rel="modulepreload" crossorigin href="./assets/cn-_o-1zJG7.js">
     <link rel="modulepreload" crossorigin href="./assets/desktop-query-CUSeEKFd.js">
     <link rel="stylesheet" crossorigin href="./assets/index-mCl6wPTb.css">
-  </head>
+  <style>
+#tailscale-indicator { position: fixed; top: 8px; right: 8px; z-index: 9999; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; backdrop-filter: blur(10px); }
+#tailscale-indicator.connected { background: rgba(80, 197, 116, 0.2); border: 1px solid rgba(80, 197, 116, 0.4); color: #50c574; }
+#tailscale-indicator.disconnected { background: rgba(255, 107, 107, 0.2); border: 1px solid rgba(255, 107, 107, 0.4); color: #ff6b6b; }
+@media (max-width: 768px) {
+  [data-app-shell], #root > div { height: 100vh !important; height: 100dvh !important; display: flex !important; flex-direction: column !important; }
+  [data-workspace], [data-workspace-view], .workspace-view { flex: 1 !important; overflow: hidden !important; min-height: 0 !important; }
+  [data-thread], [data-timeline], .thread-timeline, .thread-container { flex: 1 !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; min-height: 0 !important; }
+  .terminal-drawer, .artifact-drawer, .agent-view, .artifacts-view { display: none !important; }
+  .motion-terminal-drawer[data-open="true"] { display: none !important; }
+}
+</style></head>
   <body>
     <div id="root"></div>
-  </body>
+  <script>
+// Pi-Mobile wrapper - auto-connect to desktop bridge
+(function() {
+  var DESKTOP_IP = '100.69.199.38';
+  var BRIDGE_PORT = 5174;
+  
+  // Only run on Pi-Mobile (no port = accessed via Tailscale)
+  if (window.location.port) return;
+  
+  function updateBridgeStatus() {
+    var indicator = document.getElementById('tailscale-indicator');
+    if (!indicator) return;
+    
+    fetch('http://' + DESKTOP_IP + ':' + BRIDGE_PORT + '/__howcode/config', { cache: 'no-store' })
+      .then(function(r) {
+        indicator.className = r.ok ? 'connected' : 'disconnected';
+        indicator.textContent = r.ok ? '🟢 Desktop' : '🔴 Disconnected';
+      })
+      .catch(function() {
+        indicator.className = 'disconnected';
+        indicator.textContent = '🔴 Disconnected';
+      });
+  }
+  
+  // Add indicator
+  document.body.insertAdjacentHTML('afterbegin', 
+    '<div id="tailscale-indicator" class="disconnected">🔴 Connecting...</div>');
+  
+  // Try to connect to bridge
+  localStorage.setItem('pi-mobile-bridge-url', 'http://' + DESKTOP_IP + ':' + BRIDGE_PORT);
+  
+  // Update status after page loads
+  window.addEventListener('load', function() { setTimeout(updateBridgeStatus, 1000); });
+  setInterval(updateBridgeStatus, 30000);
+})();
+</script></body>
   </html>

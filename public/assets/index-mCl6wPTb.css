@@ -2,16 +2,10 @@
 
 
 /* Mobile CSS - Pi-Mobile */
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; width: 100%; overflow: hidden; }
-body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #e0e0e0; touch-action: manipulation; -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
-#tailscale-indicator { position: fixed; top: 8px; right: 8px; z-index: 9999; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; backdrop-filter: blur(10px); }
-#tailscale-indicator.connected { background: rgba(80, 197, 116, 0.2); border: 1px solid rgba(80, 197, 116, 0.4); color: #50c574; }
-#tailscale-indicator.disconnected { background: rgba(255, 107, 107, 0.2); border: 1px solid rgba(255, 107, 107, 0.4); color: #ff6b6b; }
 @media (max-width: 768px) {
   [data-app-shell], #root > div { height: 100vh !important; height: 100dvh !important; display: flex !important; flex-direction: column !important; }
   [data-workspace], [data-workspace-view], .workspace-view { flex: 1 !important; overflow: hidden !important; min-height: 0 !important; }
   [data-thread], [data-timeline], .thread-timeline, .thread-container { flex: 1 !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; min-height: 0 !important; }
-  .terminal-drawer, [data-terminal-drawer], .artifact-drawer, [data-artifact-drawer], .agent-view, .artifacts-view { display: none !important; }
+  .terminal-drawer, .artifact-drawer, .agent-view, .artifacts-view { display: none !important; }
   .motion-terminal-drawer[data-open="true"] { display: none !important; }
 }
