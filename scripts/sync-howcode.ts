@@ -52,9 +52,7 @@ async function syncHowcode(): Promise<void> {
   console.log('🔨 Building howcode...');
   await runCommand('npm', ['exec', '--', 'vite', 'build'], HOWCODE_PATH);
   
-  // Build pages
-  console.log('🔨 Building pages...');
-  await runCommand('npm', ['exec', '--', 'vite', 'build', '--config', 'pages/vite.config.ts'], HOWCODE_PATH);
+
 
   // Clean public (keep icons, favicon)
   console.log('🧹 Cleaning public folder...');
@@ -70,9 +68,6 @@ async function syncHowcode(): Promise<void> {
   console.log('📁 Copying howcode build...');
   await copyDir(HOWCODE_DIST, DEST_PUBLIC);
   
-  // Copy pages to public/howcode/
-  console.log('📁 Copying landing page...');
-  await copyDir(HOWCODE_DIST_PAGES, join(DEST_PUBLIC, 'howcode'));
 
   console.log('\n✅ Sync complete!');
   console.log('   Run: node server.js');
