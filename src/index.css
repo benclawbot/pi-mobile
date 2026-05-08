@@ -272,3 +272,61 @@ button, a, input, select {
   width: 24px;
   height: 24px;
 }
+
+/* Bridge status */
+.bridge-status {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(26, 26, 46, 0.9);
+  border: 1px solid #333;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #888;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.bridge-status.connecting {
+  border-color: #f39c12;
+}
+
+.bridge-status.connected {
+  border-color: #00b894;
+  color: #00b894;
+}
+
+.bridge-status.disconnected {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.bridge-status:hover {
+  background: rgba(26, 26, 46, 1);
+}
+
+.bridge-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.bridge-status.connecting .bridge-status-dot {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.bridge-status-text {
+  white-space: nowrap;
+}

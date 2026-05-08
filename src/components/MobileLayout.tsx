@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import BridgeStatus from './BridgeStatus';
 
 interface MobileLayoutProps {
   children: React.ReactNode;
@@ -94,6 +95,9 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
 
       {/* Main content */}
       <main className="main-content">{children}</main>
+
+      {/* Bridge status */}
+      <BridgeStatus />
 
       {/* Status bar */}
       <footer className="status-bar">
